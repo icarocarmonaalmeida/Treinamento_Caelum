@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Agenda</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="novo">Novo</string>
+    <string name="mapa">Mapa</string>
+    <string name="mais_opcoes">Mais opções</string>
+    <string name="sincroniza">Sincroniza</string>
+    <string name="baixar_provas">Baixar provas</string>
+    <string name="prefer_ncias">Preferências</string>
+
+</resources>
