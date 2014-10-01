@@ -1,38 +1,50 @@
 package br.com.caelum.cadastro.dao;
 
-import br.com.caelum.cadastro.modelo.Aluno;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+import android.database.Cursor;
+import br.com.caelum.cadastro.modelo.Aluno;
 
-public class AlunoDAO extends SQLiteOpenHelper {
-
-	private static final String DATABASE = "FJ57";
-	private static final int VERSAO = 1;
+public class AlunoDAO extends DAOHelper {
 	private static final String TABELA = "CadastroCaelum";
+	private static final String[] COLUNAS = { "id", "nome", "telefone",
+			"endereco", "site", "nota", "foto" };
 
 	public AlunoDAO(Context context) {
-		super(context, DATABASE, null, VERSAO);
-	}
-
-	@Override
-	public void onCreate(SQLiteDatabase db) {
-		String ddl = "CREATE TABLE " + TABELA + " (id INTEGER PRIMARY KEY, "
-				+ " nome TEXT UNIQUE NOT NULL, telefone TEXT, endereco TEXT, "
-				+ " site TEXT, nota REAL, foto TEXT);";
-		db.execSQL(ddl);
-	}
-
-	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		String dll = "DROP TABLE IF EXIST " + TABELA;
-		db.execSQL(dll);
-		this.onCreate(db);
+		super(context, TABELA);
 	}
 
 	public void insert(Aluno aluno) {
-		getWritableDatabase().insert(TABELA, null, toValues(aluno));
+		insert(toValues(aluno));
+	}
+
+	public void deletar(String[] args) {
+		delete(args);
+	}
+
+	public List<Aluno> getlista() {
+		List<Aluno> alunos = new ArrayList<Aluno>();
+
+		Cursor cursor = listar(COLUNAS);
+
+		while (cursor.moveToNext()) {
+			Aluno aluno = new Aluno();
+
+			aluno.setId(cursor.getLong(0));
+			aluno.setNome(cursor.getString(1));
+			aluno.setTelefone(cursor.getString(2));
+			aluno.setEndereco(cursor.getString(3));
+			aluno.setSite(cursor.getString(4));
+			aluno.setNota(cursor.getDouble(5));
+			aluno.setFoto(cursor.getString(6));
+
+			alunos.add(aluno);
+		}
+		cursor.close();
+		return alunos;
 	}
 
 	private ContentValues toValues(Aluno aluno) {
@@ -44,7 +56,6 @@ public class AlunoDAO extends SQLiteOpenHelper {
 		values.put("telefone", aluno.getTelefone());
 		values.put("nota", aluno.getNota());
 		values.put("foto", aluno.getFoto());
-
 		return values;
 
 	}

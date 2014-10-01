@@ -1,12 +1,17 @@
 package br.com.caelum.cadastro;
 
+import java.util.List;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -14,11 +19,15 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+import br.com.caelum.cadastro.dao.AlunoDAO;
+import br.com.caelum.cadastro.modelo.Aluno;
 
 @SuppressLint("NewApi")
 public class ListaAlunos extends ActionBarActivity {
 
 	private ListView listaAlunos;
+	private List<Aluno> alunos;
+	private Aluno aluno;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -27,12 +36,9 @@ public class ListaAlunos extends ActionBarActivity {
 		setContentView(R.layout.lista_clientes);
 
 		this.listaAlunos = (ListView) findViewById(R.id.lista_alunos);
-		final String[] nomes = { "Anderson", "Filipe", "Guilherme" };
 
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_list_item_1, nomes);
+		registerForContextMenu(listaAlunos);
 
-		listaAlunos.setAdapter(adapter);
 		listaAlunos.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -49,9 +55,8 @@ public class ListaAlunos extends ActionBarActivity {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> adapter, View view,
 					int posicao, long id) {
-				Toast.makeText(ListaAlunos.this,
-						"Selecionado " + adapter.getItemAtPosition(posicao),
-						Toast.LENGTH_LONG).show();
+
+				aluno = (Aluno) adapter.getItemAtPosition(posicao);
 				return false;
 			}
 		});
@@ -60,7 +65,6 @@ public class ListaAlunos extends ActionBarActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-
 		switch (item.getItemId()) {
 		case R.id.menu_novo:
 			Intent intent = new Intent(ListaAlunos.this,
@@ -71,15 +75,55 @@ public class ListaAlunos extends ActionBarActivity {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
-
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater menu_example = getMenuInflater();
 		menu_example.inflate(R.menu.menu_principal, menu);
-
-		// getMenuInflater().inflate(R.menu.menu_principal, menu);
 		return true;
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		this.carregaLista();
+	}
+
+	private void carregaLista() {
+		AlunoDAO dao = new AlunoDAO(this);
+		alunos = dao.getlista();
+		dao.close();
+		ArrayAdapter<Aluno> adapter = new ArrayAdapter<>(this,
+				android.R.layout.simple_list_item_1, alunos);
+		listaAlunos.setAdapter(adapter);
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+
+		menu.add("Ligar");
+		menu.add("Enviar SMS");
+		menu.add("Achar no Mapa");
+		menu.add("Navegar no Site");
+		MenuItem deletar = menu.add("deletar");
+		deletar.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+
+			@Override
+			public boolean onMenuItemClick(MenuItem item) {
+				AlunoDAO dao = new AlunoDAO(ListaAlunos.this);
+				String[] args = { aluno.getId().toString() };
+				dao.deletar(args);
+				dao.close();
+
+				carregaLista();
+
+				return false;
+			}
+		});
+		menu.add("Envia e-mail");
+
 	}
 }

@@ -4,41 +4,47 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class DAOHelper extends SQLiteOpenHelper {
-	private String name;
-	private String queryCreate;
-	private String queryUpdate;
 
-	public DAOHelper(Context context, String name, CursorFactory factory,
-			int version, String queryCreate, String queryUpdate) {
-		super(context, name, factory, version);
-		this.name = name;
-		this.queryCreate = queryCreate;
-		this.queryUpdate = queryUpdate;
+	private static final String DATABASE = "FJ57";
+	private static final int VERSAO = 1;
+	private static final String TABELA_CADATROCAELUM = "CREATE TABLE CadastroCaelum "
+			+ " (id INTEGER PRIMARY KEY, "
+			+ " nome TEXT UNIQUE NOT NULL, telefone TEXT, endereco TEXT, "
+			+ " site TEXT, nota REAL, foto TEXT);";
+
+	private static String TABELA;
+
+	public DAOHelper(Context context, String tabela) {
+		super(context, DATABASE, null, VERSAO);
+		TABELA = tabela;
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(queryCreate);
+		db.execSQL(TABELA_CADATROCAELUM);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		db.execSQL(queryUpdate);
+		String dll = "DROP TABLE IF EXIST " + TABELA;
+		db.execSQL(dll);
 		this.onCreate(db);
 	}
 
-	public void insert(ContentValues values) {
-		getWritableDatabase().insert(name, null, values);
+	protected void insert(ContentValues values) {
+		getWritableDatabase().insert(TABELA, null, values);
 	}
 
-	public Cursor listar(String[] colunas) {
-		Cursor cursor = getWritableDatabase().query(name, colunas, null, null,
-				null, null, null);
+	protected Cursor listar(String[] colunas) {
+		Cursor cursor = getWritableDatabase().query(TABELA, colunas, null,
+				null, null, null, null);
 		return cursor;
 	}
 
+	protected void delete(String[] args) {
+		getWritableDatabase().delete(TABELA, "id=?", args);
+	}
 }
