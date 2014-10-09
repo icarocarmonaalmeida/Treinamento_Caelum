@@ -15,7 +15,6 @@ public class FormularioHelper {
 	private ImageView botaoImagem;
 
 	public FormularioHelper(FormularioActivity activity) {
-
 		nome = (EditText) activity.findViewById(R.id.nome);
 		telefone = (EditText) activity.findViewById(R.id.telefone);
 		site = (EditText) activity.findViewById(R.id.site);
